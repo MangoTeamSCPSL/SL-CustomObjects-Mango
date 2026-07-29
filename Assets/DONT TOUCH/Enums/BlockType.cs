@@ -8,4 +8,9 @@
     Schematic = 5,
     Teleport = 6,
     Locker = 7,
+    Text = 8,
+    Interactable = 9,
+    Waypoint = 10,
+    Door = 11,
+    ShootingTarget = 12,
 }

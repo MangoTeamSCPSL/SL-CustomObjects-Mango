@@ -244,6 +244,115 @@ public static class Decompiler
                 
                 return gameObject.transform;
             }
+
+            case BlockType.Text:
+            {
+                gameObject = new GameObject(block.Name);
+                gameObject.transform.SetParent(rootObject);
+                gameObject.transform.localPosition = block.Position;
+                gameObject.transform.localEulerAngles = block.Rotation;
+                gameObject.transform.localScale = block.Scale;
+
+                TextToyComponent textComponent = gameObject.AddComponent<TextToyComponent>();
+                if (block.Properties != null)
+                {
+                    textComponent.Text = block.Properties.TryGetValue("Text", out object text)
+                        ? text.ToString()
+                        : "Custom Text";
+
+                    if (block.Properties.TryGetValue("DisplaySize", out object displaySize))
+                    {
+                        SerializableVector2 vector = JsonConvert.DeserializeObject<SerializableVector2>(
+                            JsonConvert.SerializeObject(displaySize));
+                        textComponent.DisplaySize = (Vector2)vector * 20f;
+                    }
+                }
+
+                _objectFromId.Add(block.ObjectId, gameObject.transform);
+                break;
+            }
+
+            case BlockType.Interactable:
+            {
+                gameObject = new GameObject(block.Name);
+                gameObject.transform.SetParent(rootObject);
+                gameObject.transform.localPosition = block.Position;
+                gameObject.transform.localEulerAngles = block.Rotation;
+                gameObject.transform.localScale = block.Scale;
+
+                InteractableToyComponent interactable = gameObject.AddComponent<InteractableToyComponent>();
+                if (block.Properties != null)
+                {
+                    if (block.Properties.TryGetValue("Shape", out object shape))
+                        interactable.Shape = (InteractableShape)Convert.ToInt32(shape);
+                    if (block.Properties.TryGetValue("InteractionDuration", out object duration))
+                        interactable.InteractionDuration = Convert.ToSingle(duration);
+                    if (block.Properties.TryGetValue("IsLocked", out object isLocked))
+                        interactable.IsLocked = Convert.ToBoolean(isLocked);
+                }
+
+                _objectFromId.Add(block.ObjectId, gameObject.transform);
+                break;
+            }
+
+            case BlockType.Waypoint:
+            {
+                gameObject = new GameObject(block.Name);
+                gameObject.transform.SetParent(rootObject);
+                gameObject.transform.localPosition = block.Position;
+                gameObject.transform.localEulerAngles = block.Rotation;
+                gameObject.transform.localScale = (Vector3)block.Scale / 256f;
+                gameObject.AddComponent<WaypointToyComponent>();
+
+                _objectFromId.Add(block.ObjectId, gameObject.transform);
+                break;
+            }
+
+            case BlockType.Door:
+            {
+                gameObject = new GameObject(block.Name);
+                gameObject.transform.SetParent(rootObject);
+                gameObject.transform.localPosition = block.Position;
+                gameObject.transform.localEulerAngles = block.Rotation;
+                gameObject.transform.localScale = block.Scale;
+
+                DoorComponent door = gameObject.AddComponent<DoorComponent>();
+                if (block.Properties != null)
+                {
+                    if (block.Properties.TryGetValue("DoorType", out object doorType))
+                        door.DoorType = (SchematicDoorType)Convert.ToInt32(doorType);
+                    if (block.Properties.TryGetValue("IsOpen", out object isOpen))
+                        door.IsOpen = Convert.ToBoolean(isOpen);
+                    if (block.Properties.TryGetValue("IsLocked", out object doorLocked))
+                        door.IsLocked = Convert.ToBoolean(doorLocked);
+                    if (block.Properties.TryGetValue("RequiredPermissions", out object permissions))
+                        door.RequiredPermissions = (KeycardPermissions)Convert.ToInt32(permissions);
+                    if (block.Properties.TryGetValue("RequireAll", out object requireAll))
+                        door.RequireAll = Convert.ToBoolean(requireAll);
+                }
+
+                _objectFromId.Add(block.ObjectId, gameObject.transform);
+                break;
+            }
+
+            case BlockType.ShootingTarget:
+            {
+                gameObject = new GameObject(block.Name);
+                gameObject.transform.SetParent(rootObject);
+                gameObject.transform.localPosition = block.Position;
+                gameObject.transform.localEulerAngles = block.Rotation;
+                gameObject.transform.localScale = block.Scale;
+
+                ShootingTargetComponent target = gameObject.AddComponent<ShootingTargetComponent>();
+                if (block.Properties != null &&
+                    block.Properties.TryGetValue("TargetType", out object targetType))
+                {
+                    target.TargetType = (SchematicTargetType)Convert.ToInt32(targetType);
+                }
+
+                _objectFromId.Add(block.ObjectId, gameObject.transform);
+                break;
+            }
         }
 
         if (TryGetAnimatorController(block.AnimatorName, out animatorController))
