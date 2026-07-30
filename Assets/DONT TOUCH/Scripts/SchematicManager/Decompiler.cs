@@ -353,6 +353,25 @@ public static class Decompiler
                 _objectFromId.Add(block.ObjectId, gameObject.transform);
                 break;
             }
+
+            case BlockType.HczClutter:
+            {
+                gameObject = new GameObject(block.Name);
+                gameObject.transform.SetParent(rootObject);
+                gameObject.transform.localPosition = block.Position;
+                gameObject.transform.localEulerAngles = block.Rotation;
+                gameObject.transform.localScale = block.Scale;
+
+                HczClutterComponent clutter = gameObject.AddComponent<HczClutterComponent>();
+                if (block.Properties != null &&
+                    block.Properties.TryGetValue("ClutterType", out object clutterType))
+                {
+                    clutter.ClutterType = (HczClutterType)Convert.ToByte(clutterType);
+                }
+
+                _objectFromId.Add(block.ObjectId, gameObject.transform);
+                break;
+            }
         }
 
         if (TryGetAnimatorController(block.AnimatorName, out animatorController))

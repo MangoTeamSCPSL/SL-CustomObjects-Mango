@@ -13,4 +13,5 @@
     Waypoint = 10,
     Door = 11,
     ShootingTarget = 12,
+    HczClutter = 13,
 }

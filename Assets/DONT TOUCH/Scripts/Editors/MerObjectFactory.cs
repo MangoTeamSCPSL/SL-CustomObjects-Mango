@@ -48,6 +48,33 @@ public static class MerObjectFactory
     [MenuItem("GameObject/MER Objects/Shooting Target/Binary", false, 62)]
     private static void CreateBinaryTarget() => CreateShootingTarget(SchematicTargetType.Binary);
 
+    [MenuItem("GameObject/MER Objects/HCZ Clutter/Long Pipes", false, 80)]
+    private static void CreateLongPipes() => CreateHczClutter(HczClutterType.ClutterPipesLong);
+
+    [MenuItem("GameObject/MER Objects/HCZ Clutter/Simple Boxes", false, 81)]
+    private static void CreateSimpleBoxes() => CreateHczClutter(HczClutterType.ClutterSimpleBoxes);
+
+    [MenuItem("GameObject/MER Objects/HCZ Clutter/Short Pipes", false, 82)]
+    private static void CreateShortPipes() => CreateHczClutter(HczClutterType.ClutterPipesShort);
+
+    [MenuItem("GameObject/MER Objects/HCZ Clutter/Broken Electrical Box", false, 83)]
+    private static void CreateBrokenElectricalBox() =>
+        CreateHczClutter(HczClutterType.ClutterBrokenElectricalBox);
+
+    [MenuItem("GameObject/MER Objects/HCZ Clutter/Boxes Ladder", false, 84)]
+    private static void CreateBoxesLadder() => CreateHczClutter(HczClutterType.ClutterBoxesLadder);
+
+    [MenuItem("GameObject/MER Objects/HCZ Clutter/Tank-supported Shelf", false, 85)]
+    private static void CreateTankSupportedShelf() =>
+        CreateHczClutter(HczClutterType.ClutterTankSupportedShelf);
+
+    [MenuItem("GameObject/MER Objects/HCZ Clutter/Angled Fences", false, 86)]
+    private static void CreateAngledFences() => CreateHczClutter(HczClutterType.ClutterAngledFences);
+
+    [MenuItem("GameObject/MER Objects/HCZ Clutter/Huge Orange Pipes", false, 87)]
+    private static void CreateHugeOrangePipes() =>
+        CreateHczClutter(HczClutterType.ClutterHugeOrangePipes);
+
     private static void CreateDoor(SchematicDoorType doorType)
     {
         GameObject gameObject = CreateObject(doorType + "Door");
@@ -61,6 +88,14 @@ public static class MerObjectFactory
         GameObject gameObject = CreateObject(targetType + "Target");
         ShootingTargetComponent component = Undo.AddComponent<ShootingTargetComponent>(gameObject);
         component.TargetType = targetType;
+        EditorUtility.SetDirty(component);
+    }
+
+    private static void CreateHczClutter(HczClutterType clutterType)
+    {
+        GameObject gameObject = CreateObject(clutterType.ToString());
+        HczClutterComponent component = Undo.AddComponent<HczClutterComponent>(gameObject);
+        component.ClutterType = clutterType;
         EditorUtility.SetDirty(component);
     }
 

@@ -18,6 +18,7 @@ Unity-проект для создания схематиков ProjectMER. В M
 | InteractableToy | Box, Sphere, Capsule | Время взаимодействия и блокировка |
 | WaypointToy | Область навигации | Позиция, поворот и размер |
 | Shooting Target | Class-D, Sport, Binary | Тип мишени |
+| HCZ Clutter | Трубы, коробки, электрощит, полка, ограждения | Тип декорации |
 
 Объекты отображаются в Scene View через gizmo, поэтому их положение и размер
 видны ещё до запуска игры.
@@ -43,3 +44,4 @@ Unity-проект для создания схематиков ProjectMER. В M
 | Waypoint | 10 |
 | Door | 11 |
 | ShootingTarget | 12 |
+| HczClutter | 13 |
