@@ -103,28 +103,6 @@ public class TeleportComponent : SchematicBlock
         block.Rotation = transform.localEulerAngles;
         block.Scale = transform.localScale;
 
-        SerializableTeleport serializableTeleport = new SerializableTeleport(block)
-        {
-            RoomType = RoomType,
-            TargetTeleporters = new List<TargetTeleporter>(TargetTeleporters.Length),
-            AllowedRoles = AllowedRoleTypes.ToList(),
-            Cooldown = Cooldown,
-            TeleportSoundId = SoundOnTeleport,
-            TeleportFlags = TeleportFlags,
-            LockOnEvent = LockOnEvent,
-        };
-
-        if (!PlaySoundOnTeleport)
-            serializableTeleport.TeleportSoundId = -1;
-
-        if (OverridePlayerXRotation &&
-            TeleportFlags.HasFlag(TeleportFlags.Player))
-            serializableTeleport.PlayerRotationX = PlayerRotationX;
-
-        if (OverridePlayerYRotation &&
-            TeleportFlags.HasFlag(TeleportFlags.Player))
-            serializableTeleport.PlayerRotationY = PlayerRotationY;
-
         for (int i = 0; i < TargetTeleporters.Length; i++)
         {
             if (TargetTeleporters[i].Teleporter == null)
@@ -134,11 +112,23 @@ public class TeleportComponent : SchematicBlock
             TargetTeleporters[i].Chance = TargetTeleporters[i].ChanceToTeleport;
         }
 
-        serializableTeleport.TargetTeleporters = TargetTeleporters.ToList();
+        block.BlockType = BlockType.Teleport;
+        block.Properties = new Dictionary<string, object>
+        {
+            { "TargetIds", string.Join(",", TargetTeleporters.Select(x => x.Id.ToString()).ToArray()) },
+            { "TargetWeights", string.Join(",", TargetTeleporters.Select(x => x.Chance.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray()) },
+            { "AllowedRoles", string.Join(",", AllowedRoleTypes ?? new string[0]) },
+            { "Cooldown", Cooldown },
+            { "TeleportFlags", (int)TeleportFlags },
+            { "LockOnEvent", (int)LockOnEvent },
+            { "TeleportSoundId", PlaySoundOnTeleport ? SoundOnTeleport : -1 },
+            { "OverridePlayerXRotation", OverridePlayerXRotation },
+            { "PlayerRotationX", PlayerRotationX },
+            { "OverridePlayerYRotation", OverridePlayerYRotation },
+            { "PlayerRotationY", PlayerRotationY },
+        };
 
-        schematic.Teleports.Add(serializableTeleport);
-
-        return false;
+        return true;
     }
 
 

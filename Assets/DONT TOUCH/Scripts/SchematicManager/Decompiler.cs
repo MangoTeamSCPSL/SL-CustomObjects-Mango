@@ -45,6 +45,7 @@ public static class Decompiler
         
         CreateRecursiveFromID(_schematicData.RootObjectId, _schematicData.Blocks, _rootTransform);
         CreateTeleporters();
+        ResolveTeleportTargets();
         AddRigidbodies();
 
         Debug.Log($"<color=#00FF00>Successfully imported <b>{_schematicName}</b> schematic in {stopwatch.ElapsedMilliseconds} ms!</color>");
@@ -133,6 +134,45 @@ public static class Decompiler
                     }
 
                     break;
+                }
+
+            case BlockType.Teleport:
+                {
+                    gameObject = Object.Instantiate(_blockPrefabs.FirstOrDefault(x => x.name == "Teleporter"), rootObject);
+                    gameObject.name = block.Name;
+                    gameObject.transform.localPosition = block.Position;
+                    gameObject.transform.localEulerAngles = block.Rotation;
+                    gameObject.transform.localScale = block.Scale;
+
+                    if (gameObject.TryGetComponent(out TeleportComponent teleport) && block.Properties != null)
+                    {
+                        string[] ids = GetProperty(block, "TargetIds").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] weights = GetProperty(block, "TargetWeights").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        teleport.TargetTeleporters = new TargetTeleporter[ids.Length];
+                        for (int i = 0; i < ids.Length; i++)
+                        {
+                            int id;
+                            float weight = 100f;
+                            int.TryParse(ids[i], out id);
+                            if (i < weights.Length)
+                                float.TryParse(weights[i], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out weight);
+                            teleport.TargetTeleporters[i] = new TargetTeleporter { Id = id, Chance = weight, ChanceToTeleport = weight };
+                        }
+
+                        teleport.AllowedRoleTypes = GetProperty(block, "AllowedRoles").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        teleport.Cooldown = float.Parse(GetProperty(block, "Cooldown"), System.Globalization.CultureInfo.InvariantCulture);
+                        teleport.TeleportFlags = (TeleportFlags)int.Parse(GetProperty(block, "TeleportFlags"));
+                        teleport.LockOnEvent = (LockOnEvent)int.Parse(GetProperty(block, "LockOnEvent"));
+                        teleport.SoundOnTeleport = int.Parse(GetProperty(block, "TeleportSoundId"));
+                        teleport.PlaySoundOnTeleport = teleport.SoundOnTeleport >= 0;
+                        teleport.OverridePlayerXRotation = bool.Parse(GetProperty(block, "OverridePlayerXRotation"));
+                        teleport.PlayerRotationX = float.Parse(GetProperty(block, "PlayerRotationX"), System.Globalization.CultureInfo.InvariantCulture);
+                        teleport.OverridePlayerYRotation = bool.Parse(GetProperty(block, "OverridePlayerYRotation"));
+                        teleport.PlayerRotationY = float.Parse(GetProperty(block, "PlayerRotationY"), System.Globalization.CultureInfo.InvariantCulture);
+                    }
+
+                    _objectFromId.Add(block.ObjectId, gameObject.transform);
+                    return gameObject.transform;
                 }
 
             case BlockType.Light:
@@ -446,13 +486,23 @@ public static class Decompiler
             _objectFromId.Add(teleport.ObjectId, gameObject.transform);
         }
 
+    }
+
+    private static void ResolveTeleportTargets()
+    {
         foreach (TeleportComponent teleport in _rootTransform.GetComponentsInChildren<TeleportComponent>())
         {
             foreach (TargetTeleporter targetTeleporter in teleport.TargetTeleporters)
             {
-                targetTeleporter.Teleporter = _objectFromId[targetTeleporter.Id].GetComponent<TeleportComponent>();
+                if (_objectFromId.TryGetValue(targetTeleporter.Id, out Transform target))
+                    targetTeleporter.Teleporter = target.GetComponent<TeleportComponent>();
             }
         }
+    }
+
+    private static string GetProperty(SchematicBlockData block, string key)
+    {
+        return block.Properties.TryGetValue(key, out object value) ? value.ToString() : string.Empty;
     }
 
     private static void AddRigidbodies()

@@ -41,7 +41,6 @@ public class Schematic : SchematicBlock
         BlockList.RootObjectId = rootObjectId;
         BlockList.Blocks.Clear();
         RigidbodyDictionary.Clear();
-        Teleports.Clear();
 
         if (TryGetComponent(out Rigidbody rigidbody))
             RigidbodyDictionary.Add(rootObjectId, new SerializableRigidbody(rigidbody));
@@ -117,11 +116,6 @@ public class Schematic : SchematicBlock
                 JsonConvert.SerializeObject(RigidbodyDictionary, Formatting.Indented,
                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-        if (Teleports.Count > 0)
-            File.WriteAllText(Path.Combine(schematicDirectoryPath, $"{name}-Teleports.json"),
-                JsonConvert.SerializeObject(Teleports, Formatting.Indented,
-                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-
         if (Config.ZipCompiledSchematics)
         {
             System.IO.Compression.ZipFile.CreateFromDirectory(schematicDirectoryPath, $"{schematicDirectoryPath}.zip",
@@ -182,7 +176,6 @@ public class Schematic : SchematicBlock
 
     internal readonly SchematicObjectDataList BlockList = new SchematicObjectDataList();
     internal readonly Dictionary<int, SerializableRigidbody> RigidbodyDictionary = new Dictionary<int, SerializableRigidbody>();
-    internal readonly List<SerializableTeleport> Teleports = new List<SerializableTeleport>();
 
     private static BuildAssetBundleOptions AssetBundleBuildOptions => BuildAssetBundleOptions.ChunkBasedCompression |
                                                                       BuildAssetBundleOptions.ForceRebuildAssetBundle |
